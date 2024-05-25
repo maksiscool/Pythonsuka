@@ -2,10 +2,16 @@ import pygame
 import math
 from random import randint
 import time
+
 pygame.init()
 start = time.time()
+def normaldegree(degree):
+    if degree < 0: degree = 360 + degree
+    while degree > 360 or degree == 360: degree -= 360
+    return degree
 
 
+pygame.mixer.Channel(0).play(pygame.mixer.Sound('ambient.mp3'))
 class Player:
     def __init__(self) -> None:
         self.width = 10
@@ -101,6 +107,7 @@ window = pygame.display.set_mode((500,500))
 pygame.display.set_caption('Default action Game')
 pygame.display.set_icon(pygame.image.load('Blue_circle.png'))
 clock = pygame.time.Clock()
+
 print()
 done = False
 frame = 0
@@ -111,7 +118,7 @@ while not done:
         for _ in range(2):
             minions.append(Minion(10, 'Red_circle.png', randint(1,360)))
     clock.tick(60)
-    window.fill('white')
+    window.fill('pink')
     player.rect.x = pygame.mouse.get_pos()[0] - player.width/2
     player.rect.y = pygame.mouse.get_pos()[1] - player.height/2
     gun.rotate(50)
@@ -120,9 +127,11 @@ while not done:
     window.blit(shield.rotated_image, (shield.rect.x-shield.width/2, shield.rect.y-shield.height/2))
 
     if boss.rect.x + boss.radius*2 > 500 or boss.rect.x < 0: #touching right wall or left wall
-        boss.angle = 360 - boss.angle
+        
+            boss.angle = 360 - boss.angle
     if boss.rect.y + boss.radius*2 > 500 or boss.rect.y < 0: #touching top wall or bottom wall
-        boss.angle = 180 - boss.angle
+        
+            boss.angle = 180 - boss.angle
     boss.move(4)
     if boss.rect.colliderect(player.rect) and frame > 60:
         done = True
@@ -130,8 +139,10 @@ while not done:
     
     for i in minions:
         if i.rect.x + i.radius*2 > 500 or i.rect.x < 0: #touching right wall or left wall
+            
             i.angle = 360 - i.angle
         if i.rect.y + i.radius*2 > 500 or i.rect.y < 0: #touching top wall or bottom wall
+            
             i.angle = 180 - i.angle
         i.move(6)
         if i.rect.colliderect(player.rect):
@@ -142,8 +153,8 @@ while not done:
     for i in bullets:
         i.move(20)
         if i.rect.colliderect(boss.rect):
+            pygame.mixer.Channel(0).play(pygame.mixer.Sound('bullet_hit.mp3'))
             health -= 1
-            print(health)
             bullets.remove(i)
         window.blit(i.image, (i.rect.x - i.radius, i.rect.y - i.radius))
 
@@ -155,9 +166,10 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if time.time()-start > 0.1:
                 start = time.time()
+                pygame.mixer.Channel(1).play(pygame.mixer.Sound('bullet_shot.mp3'))
                 bullets.append(Bullet(5, 'Black_circle.png', gun.angle))
     if health < 1:
         done = True
